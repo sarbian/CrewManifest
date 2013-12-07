@@ -35,11 +35,6 @@
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Games\KSP_win\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Games\KSP_win\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
@@ -61,7 +56,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetPath)" "C:\Program Files (x86)\Games\KSP_win\GameData\CrewManifest\Plugins"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetPath)" "C:\Games\ksp-win-0-22-0\GameData\CrewManifest\Plugins"
+copy /Y "$(TargetPath)" "C:\Games\ksp-win-0-22-0_dev\GameData\CrewManifest\Plugins"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

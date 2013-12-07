@@ -78,8 +78,9 @@ namespace CrewManifest
 
         public void CrewCheck()
         {
-            if (Settings.EnablePermaDeath)
-                Executekerbals();
+            // Sarbian : need to check if permadeath really works with default KSP
+            //if (Settings.EnablePermaDeath)
+            //    Executekerbals();
             CheckKerbalInconsistency();
         }
 
@@ -97,6 +98,8 @@ namespace CrewManifest
             }
         }
 
+        // Sarbian : not used anymore. The game kill the kerbal properly
+        /*
         private void Executekerbals()
         {
             //Persistence file doesn't look to be saved outside of the flight scene. Make changes there.
@@ -104,20 +107,20 @@ namespace CrewManifest
             {
                 List<ProtoCrewMember> kerbalsToKill = new List<ProtoCrewMember>();
 
-                for (int i = 0; i < KerbalCrewRoster.CrewRoster.Count; i++)
+                foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster)
                 {
-                    var kerbal = KerbalCrewRoster.CrewRoster[i];
-                    if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.RESPAWN) //Dead isn't used
+                    if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD) //Dead isn't used
                         kerbalsToKill.Add(kerbal);
                 }
 
                 for (int i = kerbalsToKill.Count - 1; i >= 0; i--)
                 {
                     ManifestUtilities.LogMessage(string.Format("{0} is dead. removing from roster", kerbalsToKill[i].name), "Info");
-                    KerbalCrewRoster.CrewRoster.Remove(kerbalsToKill[i]);
+                    HighLogic.CurrentGame.CrewRoster.Remove(kerbalsToKill[i]);
                 }
             }
         }
+         */
 
         private void CheckKerbalInconsistency()
         {
@@ -131,11 +134,12 @@ namespace CrewManifest
                     if(kerbal.rosterStatus != ProtoCrewMember.RosterStatus.ASSIGNED)
                         kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
 
-                    if (!KerbalCrewRoster.CrewRoster.Contains(kerbal))
+                    //if (!KerbalCrewRoster.CrewRoster.Contains(kerbal))
+                    if (!HighLogic.CurrentGame.CrewRoster.ExistsInRoster(kerbal.name))
                     {
                         //Add kerbal back if they are in vessel but not roster
                         ManifestUtilities.LogMessage(string.Format("Could not find {0}. Adding back to roster...", kerbal.name), "Info");
-                        KerbalCrewRoster.CrewRoster.Add(kerbal);
+                        HighLogic.CurrentGame.CrewRoster.AddCrewMember(kerbal);
                     }
                 }
             }

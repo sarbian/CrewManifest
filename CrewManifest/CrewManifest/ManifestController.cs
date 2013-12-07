@@ -65,7 +65,9 @@ namespace CrewManifest
             {
                 for (int i = 0; i < part.CrewCapacity && i < count; i++)
                 {
-                    ProtoCrewMember kerbal = KerbalCrewRoster.AssignNextAvailableCrewMemberTo(part);
+                    ProtoCrewMember kerbal = HighLogic.CurrentGame.CrewRoster.GetNextOrNewCrewMember();
+                    part.AddCrewmember(kerbal);
+
                     if (kerbal.seat != null)
                         kerbal.seat.SpawnCrew();
                 }
@@ -124,7 +126,7 @@ namespace CrewManifest
             kerbal.SetTimeForRespawn(0);
             kerbal.Spawn();
             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
-            KerbalCrewRoster.getNextAvailableCrewMember();
+            HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember();
         }
 
         private KerbalModel CreateKerbal()
@@ -456,10 +458,13 @@ namespace CrewManifest
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
 
+            // Sarbian: the button makes things worse now :)
+            /*
             if (GUILayout.Button("Update Portraits" , GUILayout.Width(120)))
             {
                 RespawnCrew();
             }
+             */
 
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
@@ -535,11 +540,10 @@ namespace CrewManifest
             rosterScrollViewer = GUILayout.BeginScrollView(rosterScrollViewer, GUILayout.Height(200), GUILayout.Width(300));
             GUILayout.BeginVertical();
 
-            for (int i = 0; i < KerbalCrewRoster.CrewRoster.Count; i++)
+            foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster)
             {
-                ProtoCrewMember kerbal = KerbalCrewRoster.CrewRoster[i];
                 GUIStyle labelStyle = null;
-                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.RESPAWN)
+                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING)
                     labelStyle = Resources.LabelStyleRed;
                 else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.ASSIGNED)
                     labelStyle = Resources.LabelStyleYellow;
@@ -572,7 +576,7 @@ namespace CrewManifest
                     GUI.enabled = true;
                     buttonText = "Add";
                 }
-                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.RESPAWN && ManifestBehaviour.Settings.AllowRespawn)
+                else if ((kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING) && ManifestBehaviour.Settings.AllowRespawn)
                 {
                     GUI.enabled = true;
                     buttonText = "Respawn";
@@ -597,7 +601,8 @@ namespace CrewManifest
                         RespawnKerbal(kerbal);
                     else
                     {
-                        KerbalCrewRoster.CrewRoster.Remove(SelectedKerbal.Kerbal);
+                        // Sarbian: can't remove kerbal any more
+                        //KerbalCrewRoster.CrewRoster.Remove(SelectedKerbal.Kerbal); 
                         SelectedKerbal = null;
                     }
                 }

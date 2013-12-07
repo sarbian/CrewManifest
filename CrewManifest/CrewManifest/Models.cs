@@ -37,7 +37,7 @@ namespace CrewManifest
             if (IsNew)
             {
                 Kerbal.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
-                KerbalCrewRoster.CrewRoster.Add(Kerbal);
+                HighLogic.CurrentGame.CrewRoster.AddCrewMember(Kerbal);
             }
 
             return string.Empty;
@@ -55,7 +55,7 @@ namespace CrewManifest
         {
             if(IsNew || Kerbal.name != Name)
             {
-                return KerbalCrewRoster.ExistsInRoster(Name);
+                return HighLogic.CurrentGame.CrewRoster.ExistsInRoster(Name);
             }
 
             return false;
