@@ -54,6 +54,12 @@
     <Content Include="PluginData\CrewManifest\IconOff.png" />
     <Content Include="PluginData\CrewManifest\IconOn.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\ksp_toolbar\Toolbar\Toolbar.csproj">
+      <Project>{e48dd7e6-5016-4ecf-a2c8-73a40beac326}</Project>
+      <Name>Toolbar</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetPath)" "C:\Games\ksp-win-0-22-0\GameData\CrewManifest\Plugins"

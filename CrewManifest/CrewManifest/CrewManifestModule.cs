@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Toolbar;
 
 namespace CrewManifest
 {
+
+    
     public class CrewManifestModule : PartModule
     {
         [KSPEvent(guiActive = true, guiName = "Destroy Part", active = true)]
@@ -25,7 +28,8 @@ namespace CrewManifest
                 Events["DestoryPart"].active = false;
         }
     }
-
+    
+      
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public class ManifestBehaviour : MonoBehaviour
     {
@@ -35,30 +39,42 @@ namespace CrewManifest
         private float interval = 30F;
         private float intervalCrewCheck = 0.5f;
 
+        private IButton button;
+
         public void Awake()
         {
             DontDestroyOnLoad(this);
-            Resources.LoadAssets();
             Settings.Load();
             InvokeRepeating("RunSave", interval, interval);
             InvokeRepeating("CrewCheck", intervalCrewCheck, intervalCrewCheck);
+
+            button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
+            button.TexturePath = "CrewManifest/Plugins/IconOff_24";
+            button.ToolTip = "Crew Manifest Settings";
+            button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
+            button.OnClick += (e) =>
+            {
+                if (!MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying  &&
+                    FlightGlobals.fetch != null && FlightGlobals.ActiveVessel != null &&
+                    ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton
+                    )
+                {
+                    button.TexturePath = ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow ? "CrewManifest/Plugins/IconOff_24" : "CrewManifest/Plugins/IconOn_24";
+                    ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow = !ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow;
+                }
+            };
         }
 
         public void OnDestroy()
         {
             CancelInvoke("RunSave");
             CancelInvoke("CrewCheck");
+            button.Destroy();
         }
 
         public void OnGUI()
         {
             Resources.SetupGUI();
-            if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
-            {
-                DrawButton();
-                if (Settings.ShowSettings)
-                    Settings.DrawSettingsGUI();
-            }
 
             if(Settings.ShowDebugger)
                 Settings.DebuggerPosition = GUILayout.Window(398643, Settings.DebuggerPosition, DrawDebugger, "Manifest Debug Console", GUILayout.MinHeight(20));
@@ -76,14 +92,6 @@ namespace CrewManifest
             }
         }
 
-        public void CrewCheck()
-        {
-            // Sarbian : need to check if permadeath really works with default KSP
-            //if (Settings.EnablePermaDeath)
-            //    Executekerbals();
-            CheckKerbalInconsistency();
-        }
-
         public void RunSave()
         {
             Save();
@@ -98,61 +106,8 @@ namespace CrewManifest
             }
         }
 
-        // Sarbian : not used anymore. The game kill the kerbal properly
-        /*
-        private void Executekerbals()
-        {
-            //Persistence file doesn't look to be saved outside of the flight scene. Make changes there.
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.fetch != null)
-            {
-                List<ProtoCrewMember> kerbalsToKill = new List<ProtoCrewMember>();
+ 
 
-                foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster)
-                {
-                    if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD) //Dead isn't used
-                        kerbalsToKill.Add(kerbal);
-                }
-
-                for (int i = kerbalsToKill.Count - 1; i >= 0; i--)
-                {
-                    ManifestUtilities.LogMessage(string.Format("{0} is dead. removing from roster", kerbalsToKill[i].name), "Info");
-                    HighLogic.CurrentGame.CrewRoster.Remove(kerbalsToKill[i]);
-                }
-            }
-        }
-         */
-
-        private void CheckKerbalInconsistency()
-        {
-            if (HighLogic.LoadedScene == GameScenes.FLIGHT && FlightGlobals.fetch != null && FlightGlobals.ActiveVessel != null)
-            {
-                var activeCrew = FlightGlobals.ActiveVessel.GetVesselCrew();
-                foreach (var kerbal in activeCrew)
-                {
-                    //If kerbals are in the vessel they should be assigned. I've seen the state get messed up
-                    //when restarting a flight.
-                    if(kerbal.rosterStatus != ProtoCrewMember.RosterStatus.ASSIGNED)
-                        kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
-
-                    //if (!KerbalCrewRoster.CrewRoster.Contains(kerbal))
-                    if (!HighLogic.CurrentGame.CrewRoster.ExistsInRoster(kerbal.name))
-                    {
-                        //Add kerbal back if they are in vessel but not roster
-                        ManifestUtilities.LogMessage(string.Format("Could not find {0}. Adding back to roster...", kerbal.name), "Info");
-                        HighLogic.CurrentGame.CrewRoster.AddCrewMember(kerbal);
-                    }
-                }
-            }
-        }
-
-        private void DrawButton()
-        {
-            var icon = Settings.ShowSettings ? Resources.IconOn : Resources.IconOff;
-            if (GUI.Button(Settings.ButtonPosition, new GUIContent(icon, "Manifest Settings"), Resources.IconStyle))
-            {
-                Settings.ShowSettings = true;
-            }
-        }
 
         private void DrawDebugger(int windowId)
         {

@@ -279,10 +279,6 @@ namespace CrewManifest
 
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && !MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying)
             {
-                if (CanDrawButton)
-                {
-                    DrawButton();
-                }
                 if (_showRosterWindow)
                 {
                     ManifestBehaviour.Settings.RosterPosition = GUILayout.Window(398543, ManifestBehaviour.Settings.RosterPosition, RosterWindow, "Crew Roster", GUILayout.MinHeight(20));
@@ -297,17 +293,6 @@ namespace CrewManifest
                 {
                     ManifestBehaviour.Settings.TransferPosition = GUILayout.Window(398542, ManifestBehaviour.Settings.TransferPosition, TransferWindow, "Crew Transfer", GUILayout.MinHeight(20));
                 }
-            }
-        }
-
-        private void DrawButton()
-        {
-            var icon = ShowWindow ? Resources.IconOn : Resources.IconOff;
-            if (GUI.Button(ManifestBehaviour.Settings.ButtonPosition, new GUIContent(icon, "Click to Show Manifest"), Resources.IconStyle))
-            {
-                ShowWindow = !ShowWindow;
-                if (!ShowWindow)
-                    HideAllWindows();
             }
         }
 
@@ -458,14 +443,6 @@ namespace CrewManifest
             GUILayout.EndVertical();
             GUILayout.EndScrollView();
 
-            // Sarbian: the button makes things worse now :)
-            /*
-            if (GUILayout.Button("Update Portraits" , GUILayout.Width(120)))
-            {
-                RespawnCrew();
-            }
-             */
-
             GUILayout.EndVertical();
             GUILayout.BeginVertical();
 
@@ -576,7 +553,7 @@ namespace CrewManifest
                     GUI.enabled = true;
                     buttonText = "Add";
                 }
-                else if ((kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING) && ManifestBehaviour.Settings.AllowRespawn)
+                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING)
                 {
                     GUI.enabled = true;
                     buttonText = "Respawn";
@@ -586,25 +563,13 @@ namespace CrewManifest
                     GUI.enabled = false;
                     buttonText = "--";
                 }
-
-                if (SelectedKerbal != null && SelectedKerbal.Kerbal == kerbal)
-                {
-                    GUI.enabled = true;
-                    buttonText = "Delete";
-                }
-
+                
                 if (GUILayout.Button(buttonText, GUILayout.Width(60)))
                 {
                     if (buttonText == "Add")
                         AddCrew(SelectedPart, kerbal);
                     else if (buttonText == "Respawn")
                         RespawnKerbal(kerbal);
-                    else
-                    {
-                        // Sarbian: can't remove kerbal any more
-                        //KerbalCrewRoster.CrewRoster.Remove(SelectedKerbal.Kerbal); 
-                        SelectedKerbal = null;
-                    }
                 }
                 GUILayout.EndHorizontal();
                 GUI.enabled = true;
