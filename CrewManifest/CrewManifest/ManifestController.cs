@@ -159,7 +159,8 @@ namespace CrewManifest
             {
                 ClearHighlight(_selectedPart);
                 _selectedPart = value;
-                SetPartHighlight(value, Color.yellow);
+                if (_selectedPart != null)
+                    SetPartHighlight(value, Color.yellow);
             }
         }
 
@@ -325,7 +326,11 @@ namespace CrewManifest
 
                 if (GUILayout.Button(string.Format("{0} {1}/{2}" , part.partInfo.title, part.protoModuleCrew.Count, part.CrewCapacity), style, GUILayout.Width(265)))
                 {
-                    SelectedPart = part;
+                    if (SelectedPart == part)
+                        SelectedPart = null;
+                    else
+                        SelectedPart = part;
+                    
                 }
             }
 
