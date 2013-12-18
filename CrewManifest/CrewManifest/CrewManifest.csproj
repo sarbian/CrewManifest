@@ -32,12 +32,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Games\KSP_win\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\..\..\..\Program Files (x86)\Games\KSP_win\KSP_Data\Managed\UnityEngine.dll</HintPath>
-    </Reference>
+    <Reference Include="UnityEngine"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CrewManifestModule.cs" />
@@ -62,8 +59,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetPath)" "C:\Games\ksp-win-0-22-0\GameData\CrewManifest\Plugins"
-copy /Y "$(TargetPath)" "C:\Games\ksp-win-0-22-0_dev\GameData\CrewManifest\Plugins"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetPath)" "C:\Games\ksp-win\GameData\CrewManifest\Plugins"
+copy /Y "$(TargetPath)" "C:\Games\ksp-win_dev\GameData\CrewManifest\Plugins"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
