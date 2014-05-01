@@ -59,33 +59,42 @@ namespace CrewManifest
             get { return HighLogic.LoadedScene == GameScenes.FLIGHT; }
         }
 
-        private void AddCrew(int count, Part part)
+        private void AddCrew(int count, Part part, bool fireVesselUpdate)
         {
             if (IsPreLaunch && !PartIsFull(part))
             {
                 for (int i = 0; i < part.CrewCapacity && i < count; i++)
                 {
                     ProtoCrewMember kerbal = HighLogic.CurrentGame.CrewRoster.GetNextOrNewCrewMember();
-                    part.AddCrewmember(kerbal);
 
-                    if (kerbal.seat != null)
-                        kerbal.seat.SpawnCrew();
+                    this.AddCrew(part, kerbal, false);
                 }
+
+                if (fireVesselUpdate)
+                    ManifestBehaviour.FireVesselUpdated();
             }
         }
 
-        private void AddCrew(Part part, ProtoCrewMember kerbal)
+        private void AddCrew(Part part, ProtoCrewMember kerbal, bool fireVesselUpdate)
         {
             part.AddCrewmember(kerbal);
+            
             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
             if (kerbal.seat != null)
                 kerbal.seat.SpawnCrew();
+
+            if (fireVesselUpdate)
+                ManifestBehaviour.FireVesselUpdated();
         }
 
-        private void RemoveCrew(ProtoCrewMember member, Part part)
+        private void RemoveCrew(ProtoCrewMember member, Part part, bool fireVesselUpdate)
         {
             part.RemoveCrewmember(member);
+            member.seat = null;
             member.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
+
+            if (fireVesselUpdate)
+                ManifestBehaviour.FireVesselUpdated();
         }
 
         private bool PartIsFull(Part part)
@@ -95,19 +104,23 @@ namespace CrewManifest
 
         private void MoveKerbal(Part source, Part target, ProtoCrewMember kerbal)
         {
-            RemoveCrew(kerbal, source);
-            target.AddCrewmember(kerbal);
-            if (kerbal.seat != null)
-                kerbal.seat.SpawnCrew();
-            kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
-        }
+            RemoveCrew(kerbal, source, false);
 
+            AddCrew(target, kerbal, false);
+            
+            // RemoveCrew works fine alone and AddCrew works fine alone, but if you combine them, it seems you must give KSP a moment to sort it all out,
+            // so delay the remaining steps of the transfer process.
+            ManifestBehaviour.BeginDelayedCrewTransfer(source, target, kerbal);
+        }
+        
         private void FillVessel()
         {
             foreach (var part in CrewableParts)
             {
-                AddCrew(part.CrewCapacity - part.protoModuleCrew.Count, part);
+                AddCrew(part.CrewCapacity - part.protoModuleCrew.Count, part, false);
             }
+
+            ManifestBehaviour.FireVesselUpdated();
         }
 
         private void EmptyVessel()
@@ -116,9 +129,11 @@ namespace CrewManifest
             {
                 for (int i = part.protoModuleCrew.Count - 1; i >= 0; i--)
                 {
-                    RemoveCrew(part.protoModuleCrew[i], part);
+                    RemoveCrew(part.protoModuleCrew[i], part, false);
                 }
             }
+
+            ManifestBehaviour.FireVesselUpdated();
         }
 
         private void RespawnKerbal(ProtoCrewMember kerbal)
@@ -143,7 +158,21 @@ namespace CrewManifest
         #region GUI Stuff
         public bool CanDrawButton = false;
         private bool resetRosterSize = true;
-        public bool ShowWindow { get; set; }
+        private bool showWindow = false;
+        public bool ShowWindow
+        {
+            get
+            {
+                return showWindow;
+            }
+            set
+            {
+                showWindow = value;
+
+                if (!showWindow)
+                    HideAllWindows();
+            }
+        }
         private bool _showTransferWindow { get; set; }
         private bool _showRosterWindow { get; set; }
         private Part _selectedPart;
@@ -280,7 +309,7 @@ namespace CrewManifest
 
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && !MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying)
             {
-                if (_showRosterWindow)
+                if (ShowWindow && _showRosterWindow)
                 {
                     ManifestBehaviour.Settings.RosterPosition = GUILayout.Window(398543, ManifestBehaviour.Settings.RosterPosition, RosterWindow, "Crew Roster", GUILayout.MinHeight(20));
                 }
@@ -290,7 +319,7 @@ namespace CrewManifest
                     ManifestBehaviour.Settings.ManifestPosition = GUILayout.Window(398541, ManifestBehaviour.Settings.ManifestPosition, ManifestWindow, "Crew Manifest", GUILayout.MinHeight(20));
                 }
 
-                if (_showTransferWindow)
+                if (ShowWindow && _showTransferWindow)
                 {
                     ManifestBehaviour.Settings.TransferPosition = GUILayout.Window(398542, ManifestBehaviour.Settings.TransferPosition, TransferWindow, "Crew Transfer", GUILayout.MinHeight(20));
                 }
@@ -348,7 +377,7 @@ namespace CrewManifest
                 {
                     if (GUILayout.Button(string.Format("Add a Kerbal"), GUILayout.Width(275)))
                     {
-                        AddCrew(1, SelectedPart);
+                        AddCrew(1, SelectedPart, true);
                     }
                 }
 
@@ -361,7 +390,7 @@ namespace CrewManifest
                     {
                         if (GUILayout.Button("Remove", GUILayout.Width(60)))
                         {
-                            RemoveCrew(kerbal, SelectedPart);
+                            RemoveCrew(kerbal, SelectedPart, true);
                         }
                     }
                     GUILayout.EndHorizontal();
@@ -572,7 +601,7 @@ namespace CrewManifest
                 if (GUILayout.Button(buttonText, GUILayout.Width(60)))
                 {
                     if (buttonText == "Add")
-                        AddCrew(SelectedPart, kerbal);
+                        AddCrew(SelectedPart, kerbal, true);
                     else if (buttonText == "Respawn")
                         RespawnKerbal(kerbal);
                 }
