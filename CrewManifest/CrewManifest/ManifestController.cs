@@ -59,17 +59,6 @@ namespace CrewManifest
             get { return HighLogic.LoadedScene == GameScenes.FLIGHT; }
         }
 
-        // The global vessel update is only required once after each operation or set of operations.
-        private void FireVesselUpdated()
-        {
-            // Notify everything that we've made a change to the vessel, TextureReplacer uses this, per shaw:
-            // http://forum.kerbalspaceprogram.com/threads/60936-0-23-0-Kerbal-Crew-Manifest-v0-5-6-2?p=1051394&viewfull=1#post1051394
-
-            //FlightGlobals.ActiveVessel.SpawnCrew();
-            GameEvents.onVesselChange.Fire(FlightGlobals.ActiveVessel);
-            // WORKING ON THIS - When transferring a crew member, their portrait disappears. GameEvents.onCrewBoardVessel.Fire(new GameEvents.FromToAction<Part,Part>(
-        }
-
         private void AddCrew(int count, Part part, bool fireVesselUpdate)
         {
             if (IsPreLaunch && !PartIsFull(part))
@@ -82,34 +71,20 @@ namespace CrewManifest
                 }
 
                 if (fireVesselUpdate)
-                    FireVesselUpdated();
+                    ManifestBehaviour.FireVesselUpdated();
             }
         }
 
         private void AddCrew(Part part, ProtoCrewMember kerbal, bool fireVesselUpdate)
         {
-            //int seatIndex = -1;
-            //for(int searchIndex = 0; searchIndex < part.internalModel.seats.Count; searchIndex++)
-            //{
-            //    InternalSeat seat = part.internalModel.seats[searchIndex];
-
-            //    if(!seat.taken)
-            //    {
-            //        seatIndex = searchIndex;
-            //    }                    
-            //}
-
             part.AddCrewmember(kerbal);
-            //part.AddCrewmemberAt(kerbal, seatIndex);
             
             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
             if (kerbal.seat != null)
                 kerbal.seat.SpawnCrew();
 
-            //part.vessel.SpawnCrew();
-            
             if (fireVesselUpdate)
-                FireVesselUpdated();
+                ManifestBehaviour.FireVesselUpdated();
         }
 
         private void RemoveCrew(ProtoCrewMember member, Part part, bool fireVesselUpdate)
@@ -118,10 +93,8 @@ namespace CrewManifest
             member.seat = null;
             member.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
 
-            //part.vessel.SpawnCrew();
-
             if (fireVesselUpdate)
-                FireVesselUpdated();
+                ManifestBehaviour.FireVesselUpdated();
         }
 
         private bool PartIsFull(Part part)
@@ -133,36 +106,13 @@ namespace CrewManifest
         {
             RemoveCrew(kerbal, source, false);
 
-            // Setup delayed Add...
-
-            //delayedAddCrewTarget = target;
-            //delayedAddCrewMember = kerbal;
-
-            //ScreenMessages.PostScreenMessage("Crew transfer in progress...", 0.2f, ScreenMessageStyle.UPPER_CENTER);
-
             AddCrew(target, kerbal, false);
-            //Invoke("DelayedAddCrew", 0.2f);
-            //FlightGlobals.fetch.Invoke("DelayedAddCrew", 0.2f);
-
-            //target.SpawnCrew();
-
+            
+            // RemoveCrew works fine alone and AddCrew works fine alone, but if you combine them, it seems you must give KSP a moment to sort it all out,
+            // so delay the remaining steps of the transfer process.
             ManifestBehaviour.BeginDelayedCrewTransfer(source, target, kerbal);
-
-            FireVesselUpdated();
         }
-
-        //private Part delayedAddCrewTarget;
-        //private ProtoCrewMember delayedAddCrewMember;
-        //private void DelayedAddCrew()
-        //{
-        //    AddCrew(delayedAddCrewTarget, delayedAddCrewMember, true);
-
-        //    ScreenMessages.PostScreenMessage("Crew transfer complete.", 0.2f, ScreenMessageStyle.UPPER_CENTER);
-
-        //    delayedAddCrewTarget = null;
-        //    delayedAddCrewMember = null;
-        //}
-
+        
         private void FillVessel()
         {
             foreach (var part in CrewableParts)
@@ -170,7 +120,7 @@ namespace CrewManifest
                 AddCrew(part.CrewCapacity - part.protoModuleCrew.Count, part, false);
             }
 
-            FireVesselUpdated();
+            ManifestBehaviour.FireVesselUpdated();
         }
 
         private void EmptyVessel()
@@ -183,7 +133,7 @@ namespace CrewManifest
                 }
             }
 
-            FireVesselUpdated();
+            ManifestBehaviour.FireVesselUpdated();
         }
 
         private void RespawnKerbal(ProtoCrewMember kerbal)
@@ -356,14 +306,6 @@ namespace CrewManifest
                 ManifestBehaviour.Settings.RosterPosition.height = 100; //reset hight
                 resetRosterSize = false;
             }
-
-            //HighLogic.CurrentGame.
-            //GUIContent[] guis = GameObject.FindObjectsOfType<GUIContent>();
-            //Debug.Log(string.Format("CM guis.Count = {0}", guis.Length));
-            //for(int i = 0; i < guis.Length; i++)
-            //{
-            //    Debug.Log(string.Format("CM gui {0}, text = {1}, ", i, guis[i].text));
-            //}
 
             if (HighLogic.LoadedScene == GameScenes.FLIGHT && !MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying)
             {

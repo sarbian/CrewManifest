@@ -37,18 +37,18 @@ namespace CrewManifest
         public static SettingsManager Settings = new SettingsManager();
         private float interval = 30F;
         private float intervalCrewCheck = 0.5f;
+        private double crewTransferDelay = 0.25;
 
         private IButton button;
 
         public void Awake()
         {
-            if(HighLogic.LoadedScene == GameScenes.FLIGHT)
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
                 DontDestroyOnLoad(this);
                 Settings.Load();
                 InvokeRepeating("RunSave", interval, interval);
-                //InvokeRepeating("CrewCheck", intervalCrewCheck, intervalCrewCheck);
-
+                
                 button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
                 button.TexturePath = "CrewManifest/Plugins/IconOff_24";
                 button.ToolTip = "Crew Manifest";
@@ -71,10 +71,9 @@ namespace CrewManifest
 
         public void OnDestroy()
         {
-            if(HighLogic.LoadedScene == GameScenes.FLIGHT)
+            if (HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
                 CancelInvoke("RunSave");
-                //CancelInvoke("CrewCheck");
 
                 if (button != null)
                     button.Destroy();
@@ -98,27 +97,25 @@ namespace CrewManifest
                     //Instantiate the controller for the active vessel.
                     ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton = true;
 
-                    if(crewTransferPending)
+                    if (crewTransfer != null)
                     {
-                        if(Planetarium.GetUniversalTime() - crewTransferInitiated >= 0.25)
+                        if (Planetarium.GetUniversalTime() - crewTransfer.Initiated >= crewTransferDelay)
                         {
-                            if(crewTransferSourcePart != null && crewTransferDestinationPart != null && crewTransferCrewMember != null)
+                            if (crewTransfer.Source != null && crewTransfer.Destination != null && crewTransfer.CrewMember != null)
                             {
-                                ScreenMessages.PostScreenMessage("Crew transfer complete.", 1.0f, ScreenMessageStyle.UPPER_CENTER);
+                                ScreenMessages.PostScreenMessage(string.Format("{0}'s transfer complete.", crewTransfer.CrewMember.name), 2.0f, ScreenMessageStyle.UPPER_CENTER);
 
-                                if(object.ReferenceEquals(crewTransferSourcePart.vessel, crewTransferDestinationPart.vessel))
+                                if(!object.ReferenceEquals(crewTransfer.Source.vessel, crewTransfer.Destination.vessel))
                                 {
-                                    crewTransferDestinationPart.vessel.SpawnCrew();
+                                    crewTransfer.Source.vessel.SpawnCrew();
                                 }
-                                else
-                                {
-                                    crewTransferSourcePart.vessel.SpawnCrew();
-                                    crewTransferDestinationPart.vessel.SpawnCrew();
-                                }
+
+                                crewTransfer.Destination.vessel.SpawnCrew();
+
+                                FireVesselUpdated();
                             }
 
-                            crewTransferInitiated = 0;
-                            crewTransferPending = false;
+                            crewTransfer = null;
                         }
                     }
                 }
@@ -139,18 +136,36 @@ namespace CrewManifest
             }
         }
 
-        private static volatile bool crewTransferPending = false;
-        private static Part crewTransferSourcePart;
-        private static Part crewTransferDestinationPart;
-        private static ProtoCrewMember crewTransferCrewMember;
-        private static double crewTransferInitiated = 0;
+        // The global vessel update is only required once after each operation or set of operations.
+        internal static void FireVesselUpdated()
+        {
+            // Notify everything that we've made a change to the vessel, TextureReplacer uses this, per shaw:
+            // http://forum.kerbalspaceprogram.com/threads/60936-0-23-0-Kerbal-Crew-Manifest-v0-5-6-2?p=1051394&viewfull=1#post1051394
+
+            GameEvents.onVesselChange.Fire(FlightGlobals.ActiveVessel);
+        }
+
+        private class CrewTransfer
+        {
+            public Part Source;
+            public Part Destination;
+            public ProtoCrewMember CrewMember;
+            public double Initiated;
+
+            public CrewTransfer(Part source, Part destination, ProtoCrewMember crewMember)
+            {
+                this.Source = source;
+                this.Destination = destination;
+                this.CrewMember = crewMember;
+                this.Initiated = Planetarium.GetUniversalTime();
+            }
+        }
+
+        private static CrewTransfer crewTransfer;
+
         internal static void BeginDelayedCrewTransfer(Part source, Part destination, ProtoCrewMember crewMember)
         {
-            crewTransferInitiated = Planetarium.GetUniversalTime();
-            crewTransferSourcePart = source;
-            crewTransferDestinationPart = destination;
-            crewTransferCrewMember = crewMember;
-            crewTransferPending = true;
+            crewTransfer = new CrewTransfer(source, destination, crewMember);
         }
         
         private void DrawDebugger(int windowId)
