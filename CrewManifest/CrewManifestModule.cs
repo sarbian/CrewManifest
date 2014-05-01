@@ -50,7 +50,7 @@ namespace CrewManifest
                 InvokeRepeating("RunSave", interval, interval);
                 
                 button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
-                button.TexturePath = "CrewManifest/Plugins/IconOff_24";
+                button.TexturePath = "CrewManifest/Icons/IconOff_24";
                 button.ToolTip = "Crew Manifest";
                 button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
                 button.OnClick += (e) =>
@@ -62,7 +62,7 @@ namespace CrewManifest
                     {
                         ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
 
-                        button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Plugins/IconOff_24" : "CrewManifest/Plugins/IconOn_24";
+                        button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Icons/IconOff_24" : "CrewManifest/Icons/IconOn_24";
                         manifestController.ShowWindow = !manifestController.ShowWindow;
                     }
                 };
