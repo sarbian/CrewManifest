@@ -44,6 +44,16 @@ namespace CrewManifest
         public static GUIStyle LabelStyleRed;
         public static GUIStyle LabelStyleYellow;
 
+        // Part selection colors.
+        internal static readonly Color SourceColor = Color.green;
+        internal static readonly Color TargetColor = Color.red;
+        internal static readonly Color SelectionColor = Color.yellow;
+
+        // Roster status colors.
+        private static readonly Color AvailableColor = Color.white;
+        private static readonly Color UnavailableColor = Color.yellow;
+        private static readonly Color DeadColor = Color.red;
+
         public static void SetupGUI()
         {
             GUI.skin = HighLogic.Skin;
@@ -59,14 +69,14 @@ namespace CrewManifest
             IconStyle = new GUIStyle();
 
             ButtonToggledStyle = new GUIStyle(GUI.skin.button);
-            ButtonToggledStyle.normal.textColor = Color.green;
+            ButtonToggledStyle.normal.textColor = Resources.SourceColor;
             ButtonToggledStyle.normal.background = ButtonToggledStyle.onActive.background;
 
             ButtonToggledRedStyle = new GUIStyle(ButtonToggledStyle);
-            ButtonToggledRedStyle.normal.textColor = Color.red;
+            ButtonToggledRedStyle.normal.textColor = Resources.TargetColor;
 
             ButtonStyle = new GUIStyle(GUI.skin.button);
-            ButtonStyle.normal.textColor = Color.white;
+            ButtonStyle.normal.textColor = Resources.AvailableColor;
 
             ErrorLabelRedStyle = new GUIStyle(GUI.skin.label);
             ErrorLabelRedStyle.normal.textColor = Color.red;
@@ -75,10 +85,10 @@ namespace CrewManifest
             LabelStyle = new GUIStyle(GUI.skin.label);
 
             LabelStyleRed = new GUIStyle(LabelStyle);
-            LabelStyleRed.normal.textColor = Color.red;
+            LabelStyleRed.normal.textColor = Resources.DeadColor;
 
             LabelStyleYellow = new GUIStyle(LabelStyle);
-            LabelStyleYellow.normal.textColor = Color.yellow;
+            LabelStyleYellow.normal.textColor = Resources.UnavailableColor;
         }
     }
 

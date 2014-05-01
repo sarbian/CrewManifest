@@ -94,7 +94,11 @@ namespace CrewManifest
                 if (HighLogic.LoadedScene == GameScenes.FLIGHT)
                 {
                     //Instantiate the controller for the active vessel.
-                    ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton = true;
+                    ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
+
+                    manifestController.CanDrawButton = true;
+
+                    manifestController.RefreshSelectedParts();
 
                     if (crewTransfer != null)
                     {
