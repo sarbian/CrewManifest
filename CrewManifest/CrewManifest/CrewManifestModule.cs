@@ -27,10 +27,9 @@ namespace CrewManifest
             else
                 Events["DestoryPart"].active = false;
         }
-    }
-    
+    }    
       
-    [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+    [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ManifestBehaviour : MonoBehaviour
     {
         //Game object that keeps us running
@@ -43,33 +42,43 @@ namespace CrewManifest
 
         public void Awake()
         {
-            DontDestroyOnLoad(this);
-            Settings.Load();
-            InvokeRepeating("RunSave", interval, interval);
-            InvokeRepeating("CrewCheck", intervalCrewCheck, intervalCrewCheck);
-
-            button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
-            button.TexturePath = "CrewManifest/Plugins/IconOff_24";
-            button.ToolTip = "Crew Manifest Settings";
-            button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-            button.OnClick += (e) =>
+            if(HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
-                if (!MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying  &&
-                    FlightGlobals.fetch != null && FlightGlobals.ActiveVessel != null &&
-                    ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton
-                    )
+                DontDestroyOnLoad(this);
+                Settings.Load();
+                InvokeRepeating("RunSave", interval, interval);
+                //InvokeRepeating("CrewCheck", intervalCrewCheck, intervalCrewCheck);
+
+                button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
+                button.TexturePath = "CrewManifest/Plugins/IconOff_24";
+                button.ToolTip = "Crew Manifest";
+                button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
+                button.OnClick += (e) =>
                 {
-                    button.TexturePath = ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow ? "CrewManifest/Plugins/IconOff_24" : "CrewManifest/Plugins/IconOn_24";
-                    ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow = !ManifestController.GetInstance(FlightGlobals.ActiveVessel).ShowWindow;
-                }
-            };
+                    if(!MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying &&
+                        FlightGlobals.fetch != null && FlightGlobals.ActiveVessel != null &&
+                        ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton
+                        )
+                    {
+                        ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
+
+                        button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Plugins/IconOff_24" : "CrewManifest/Plugins/IconOn_24";
+                        manifestController.ShowWindow = !manifestController.ShowWindow;
+                    }
+                };
+            }
         }
 
         public void OnDestroy()
         {
-            CancelInvoke("RunSave");
-            CancelInvoke("CrewCheck");
-            button.Destroy();
+            if(HighLogic.LoadedScene == GameScenes.FLIGHT)
+            {
+                CancelInvoke("RunSave");
+                //CancelInvoke("CrewCheck");
+
+                if (button != null)
+                    button.Destroy();
+            }
         }
 
         public void OnGUI()
@@ -88,6 +97,30 @@ namespace CrewManifest
                 {
                     //Instantiate the controller for the active vessel.
                     ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton = true;
+
+                    if(crewTransferPending)
+                    {
+                        if(Planetarium.GetUniversalTime() - crewTransferInitiated >= 0.25)
+                        {
+                            if(crewTransferSourcePart != null && crewTransferDestinationPart != null && crewTransferCrewMember != null)
+                            {
+                                ScreenMessages.PostScreenMessage("Crew transfer complete.", 1.0f, ScreenMessageStyle.UPPER_CENTER);
+
+                                if(object.ReferenceEquals(crewTransferSourcePart.vessel, crewTransferDestinationPart.vessel))
+                                {
+                                    crewTransferDestinationPart.vessel.SpawnCrew();
+                                }
+                                else
+                                {
+                                    crewTransferSourcePart.vessel.SpawnCrew();
+                                    crewTransferDestinationPart.vessel.SpawnCrew();
+                                }
+                            }
+
+                            crewTransferInitiated = 0;
+                            crewTransferPending = false;
+                        }
+                    }
                 }
             }
         }
@@ -106,9 +139,20 @@ namespace CrewManifest
             }
         }
 
- 
-
-
+        private static volatile bool crewTransferPending = false;
+        private static Part crewTransferSourcePart;
+        private static Part crewTransferDestinationPart;
+        private static ProtoCrewMember crewTransferCrewMember;
+        private static double crewTransferInitiated = 0;
+        internal static void BeginDelayedCrewTransfer(Part source, Part destination, ProtoCrewMember crewMember)
+        {
+            crewTransferInitiated = Planetarium.GetUniversalTime();
+            crewTransferSourcePart = source;
+            crewTransferDestinationPart = destination;
+            crewTransferCrewMember = crewMember;
+            crewTransferPending = true;
+        }
+        
         private void DrawDebugger(int windowId)
         {
             GUILayout.BeginVertical();
