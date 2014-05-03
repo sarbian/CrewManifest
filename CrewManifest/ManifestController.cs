@@ -189,7 +189,7 @@ namespace CrewManifest
                 ClearHighlight(_selectedPart);
                 _selectedPart = value;
                 if (_selectedPart != null)
-                    SetPartHighlight(value, Color.yellow);
+                    SetPartHighlight(value, Resources.SelectionColor);
             }
         }
 
@@ -210,7 +210,7 @@ namespace CrewManifest
 
                 ClearHighlight(_selectedPartSource);
                 _selectedPartSource = value;
-                SetPartHighlight(_selectedPartSource, Color.green);
+                SetPartHighlight(_selectedPartSource, Resources.SourceColor);
             }
         }
 
@@ -227,8 +227,15 @@ namespace CrewManifest
             {
                 ClearHighlight(_selectedPartTarget);
                 _selectedPartTarget = value;
-                SetPartHighlight(_selectedPartTarget, Color.red);
+                SetPartHighlight(_selectedPartTarget, Resources.TargetColor);
             }
+        }
+
+        public void RefreshSelectedParts()
+        {
+            SelectedPart = SelectedPart;
+            SelectedPartSource = SelectedPartSource;
+            SelectedPartTarget = SelectedPartTarget;
         }
 
         private List<Part> _crewableParts;
