@@ -248,11 +248,18 @@ namespace CrewManifest
                 else
                     _crewableParts.Clear();
 
+                bool selectedPartFound = false;
                 foreach (Part part in Vessel.Parts)
                 {
-                    if (part.CrewCapacity > 0)
+                    if(part.CrewCapacity > 0)
+                    {
                         _crewableParts.Add(part);
+                        selectedPartFound |= part.Equals(_selectedPart);
+                    }
                 }
+
+                if(!selectedPartFound)
+                    SelectedPart = null;
 
                 return _crewableParts;
             }
@@ -268,11 +275,18 @@ namespace CrewManifest
                 else
                     _crewablePartsSource.Clear();
 
+                bool selectedPartSourceFound = false;
                 foreach (Part part in Vessel.Parts)
                 {
-                    if (part.CrewCapacity > 0)
+                    if(part.CrewCapacity > 0)
+                    {
                         _crewablePartsSource.Add(part);
+                        selectedPartSourceFound |= part.Equals(_selectedPartSource);
+                    }
                 }
+
+                if(!selectedPartSourceFound)
+                    SelectedPartSource = null;
 
                 return _crewablePartsSource;
             }
@@ -288,11 +302,20 @@ namespace CrewManifest
                 else
                     _crewablePartsTarget.Clear();
 
+                bool selectedPartTargetFound = false;
                 foreach (Part part in Vessel.Parts)
                 {
-                    if (part.CrewCapacity > 0 && !part.Equals(SelectedPartSource))
-                        _crewablePartsTarget.Add(part);
+                    if(part.CrewCapacity > 0)
+                    {
+                        if(!part.Equals(SelectedPartSource))
+                            _crewablePartsTarget.Add(part);
+
+                        selectedPartTargetFound |= part.Equals(_selectedPartTarget);
+                    }
                 }
+
+                if(!selectedPartTargetFound)
+                    SelectedPartTarget = null;
 
                 return _crewablePartsTarget;
             }
