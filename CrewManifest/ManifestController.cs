@@ -333,7 +333,7 @@ namespace CrewManifest
 
             if (resetRosterSize)
             {
-                ManifestBehaviour.Settings.RosterPosition.height = 100; //reset hight
+                ManifestBehaviour.Settings.RosterPosition.height = 100; //reset height
                 resetRosterSize = false;
             }
 
@@ -687,6 +687,10 @@ namespace CrewManifest
 
         public void HideAllWindows()
         {
+            // Clamp all windows to screen so that when they're shown again, they're entirely on the screen. I didn't put this elsewhere in case someone
+            // does want to temporarily move a window out of the way - the window will stay put until the windows are hidden:
+            ManifestBehaviour.Settings.ClampWindowsToScreen();
+
             _showRosterWindow = false;
             _showTransferWindow = false;
             ClearHighlight(_selectedPart);

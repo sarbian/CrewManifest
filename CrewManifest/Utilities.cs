@@ -116,8 +116,9 @@ namespace CrewManifest
                 RosterPosition = configfile.GetValue<Rect>("RosterPosition");
                 SettingsPosition = configfile.GetValue<Rect>("SettingsPosition");
                 DebuggerPosition = configfile.GetValue<Rect>("DebuggerPosition");
-                ShowDebugger = configfile.GetValue<bool>("ShowDebugger");
 
+                ShowDebugger = configfile.GetValue<bool>("ShowDebugger");
+                                
                 ManifestUtilities.LogMessage(string.Format("ManifestPosition Loaded: {0}, {1}, {2}, {3}", ManifestPosition.xMin, ManifestPosition.xMax, ManifestPosition.yMin, ManifestPosition.yMax), "Info");
                 ManifestUtilities.LogMessage(string.Format("TransferPosition Loaded: {0}, {1}, {2}, {3}", TransferPosition.xMin, TransferPosition.xMax, TransferPosition.yMin, TransferPosition.yMax), "Info");
                 ManifestUtilities.LogMessage(string.Format("RosterPosition Loaded: {0}, {1}, {2}, {3}", RosterPosition.xMin, RosterPosition.xMax, RosterPosition.yMin, RosterPosition.yMax), "Info");
@@ -129,6 +130,21 @@ namespace CrewManifest
             {
                 ManifestUtilities.LogMessage(string.Format("Failed to Load Settings: {0} \r\n\r\n{1}", e.Message, e.StackTrace), "Exception");
             }
+        }
+
+        public void ClampWindowsToScreen()
+        {
+            ClampRectToScreen(ref ManifestPosition);
+            ClampRectToScreen(ref TransferPosition);
+            ClampRectToScreen(ref RosterPosition);
+            ClampRectToScreen(ref SettingsPosition);
+            ClampRectToScreen(ref DebuggerPosition);
+        }
+
+        private void ClampRectToScreen(ref Rect rect)
+        {
+            rect.x = Mathf.Clamp(rect.x, 0, Screen.width - rect.width);
+            rect.y = Mathf.Clamp(rect.y, 0, Screen.height - rect.height);
         }
 
         public void Save()
