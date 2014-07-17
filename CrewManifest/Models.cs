@@ -31,14 +31,14 @@ namespace CrewManifest
             {
                 return "That name is in use!";
             }
-
-            SyncKerbal();
-
+            
             if (IsNew)
             {
-                Kerbal.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
-                HighLogic.CurrentGame.CrewRoster.AddCrewMember(Kerbal);
+                Kerbal = HighLogic.CurrentGame.CrewRoster.GetNewKerbal();
+                Kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Available;
             }
+
+            SyncKerbal();
 
             return string.Empty;
         }
@@ -55,7 +55,7 @@ namespace CrewManifest
         {
             if(IsNew || Kerbal.name != Name)
             {
-                return HighLogic.CurrentGame.CrewRoster.ExistsInRoster(Name);
+                return HighLogic.CurrentGame.CrewRoster[Name] != null;
             }
 
             return false;

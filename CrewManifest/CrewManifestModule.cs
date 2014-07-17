@@ -35,7 +35,7 @@ namespace CrewManifest
         public static GameObject GameObjectInstance;
         public static SettingsManager Settings = new SettingsManager();
         private float interval = 30F;
-        private float intervalCrewCheck = 0.5f;
+        //private float intervalCrewCheck = 0.5f;
         private double crewTransferDelay = 0.25;
 
         private IButton button;

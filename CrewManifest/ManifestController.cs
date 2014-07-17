@@ -65,7 +65,7 @@ namespace CrewManifest
             {
                 for (int i = 0; i < part.CrewCapacity && i < count; i++)
                 {
-                    ProtoCrewMember kerbal = HighLogic.CurrentGame.CrewRoster.GetNextOrNewCrewMember();
+                    ProtoCrewMember kerbal = HighLogic.CurrentGame.CrewRoster.GetNextOrNewKerbal();
 
                     this.AddCrew(part, kerbal, false);
                 }
@@ -79,7 +79,7 @@ namespace CrewManifest
         {
             part.AddCrewmember(kerbal);
             
-            kerbal.rosterStatus = ProtoCrewMember.RosterStatus.ASSIGNED;
+            kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Assigned;
             if (kerbal.seat != null)
                 kerbal.seat.SpawnCrew();
 
@@ -91,7 +91,7 @@ namespace CrewManifest
         {
             part.RemoveCrewmember(member);
             member.seat = null;
-            member.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
+            member.rosterStatus = ProtoCrewMember.RosterStatus.Available;
 
             if (fireVesselUpdate)
                 ManifestBehaviour.FireVesselUpdated();
@@ -140,8 +140,8 @@ namespace CrewManifest
         {
             kerbal.SetTimeForRespawn(0);
             kerbal.Spawn();
-            kerbal.rosterStatus = ProtoCrewMember.RosterStatus.AVAILABLE;
-            HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember();
+            kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Available;
+            HighLogic.CurrentGame.CrewRoster.GetNextAvailableKerbal();
         }
 
         private KerbalModel CreateKerbal()
@@ -581,12 +581,12 @@ namespace CrewManifest
             rosterScrollViewer = GUILayout.BeginScrollView(rosterScrollViewer, GUILayout.Height(200), GUILayout.Width(300));
             GUILayout.BeginVertical();
 
-            foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster)
+            foreach (ProtoCrewMember kerbal in HighLogic.CurrentGame.CrewRoster.Crew)
             {
                 GUIStyle labelStyle = null;
-                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING)
+                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Missing)
                     labelStyle = Resources.LabelStyleRed;
-                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.ASSIGNED)
+                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Assigned)
                     labelStyle = Resources.LabelStyleYellow;
                 else
                     labelStyle = Resources.LabelStyle;
@@ -595,7 +595,7 @@ namespace CrewManifest
                 GUILayout.Label(kerbal.name, labelStyle, GUILayout.Width(140));
                 string buttonText = string.Empty;
 
-                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.AVAILABLE)
+                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Available)
                     GUI.enabled = true;
                 else
                     GUI.enabled = false;
@@ -612,12 +612,12 @@ namespace CrewManifest
                     }
                 }
 
-                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.AVAILABLE && IsPreLaunch && SelectedPart != null && !PartIsFull(SelectedPart))
+                if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Available && IsPreLaunch && SelectedPart != null && !PartIsFull(SelectedPart))
                 {
                     GUI.enabled = true;
                     buttonText = "Add";
                 }
-                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.DEAD || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.MISSING)
+                else if (kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Dead || kerbal.rosterStatus == ProtoCrewMember.RosterStatus.Missing)
                 {
                     GUI.enabled = true;
                     buttonText = "Respawn";
