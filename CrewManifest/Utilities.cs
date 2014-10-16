@@ -49,7 +49,7 @@ namespace CrewManifest
         internal static readonly Color TargetColor = Color.red;
         internal static readonly Color SelectionColor = Color.yellow;
 
-        // Roster status colors.
+        // Roster error colors.
         private static readonly Color AvailableColor = Color.white;
         private static readonly Color UnavailableColor = Color.yellow;
         private static readonly Color DeadColor = Color.red;

@@ -50,7 +50,7 @@ namespace CrewManifest
         {
             get
             {
-                return Vessel.landedAt == "LaunchPad" || Vessel.landedAt == "Runway";
+                return  Vessel.GetLandedAtString(Vessel.landedAt) == "LaunchPad" || Vessel.landedAt == "Runway";
             }
         }
 
