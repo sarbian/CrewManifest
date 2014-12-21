@@ -205,7 +205,7 @@ namespace CrewManifest
             }
             set
             {
-                if ((value != null && _selectedPartTarget != null) && value.uid == _selectedPartTarget.uid)
+                if ((value != null && _selectedPartTarget != null) && value.craftID == _selectedPartTarget.craftID)
                     SelectedPartTarget = null;
 
                 ClearHighlight(_selectedPartSource);
@@ -705,7 +705,7 @@ namespace CrewManifest
             if (part != null)
             {
                 part.SetHighlightDefault();
-                part.SetHighlight(false);
+                part.SetHighlight(false, false);
             }
         }
 
@@ -714,7 +714,7 @@ namespace CrewManifest
             if (part != null)
             {
                 part.SetHighlightColor(color);
-                part.SetHighlight(true);
+                part.SetHighlight(true, false);
             }
         }
         #endregion
