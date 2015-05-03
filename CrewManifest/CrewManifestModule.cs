@@ -39,6 +39,10 @@ namespace CrewManifest
         private double crewTransferDelay = 0.25;
 
         private IButton button;
+        private static ApplicationLauncherButton appButton;
+
+        private Texture2D offTexture = GameDatabase.Instance.GetTexture("CrewManifest/Icons/IconOff_38", false);
+        private Texture2D onTexture = GameDatabase.Instance.GetTexture("CrewManifest/Icons/IconOn_38", false);
 
         public void Awake()
         {
@@ -52,21 +56,42 @@ namespace CrewManifest
                 button.TexturePath = "CrewManifest/Icons/IconOff_24";
                 button.ToolTip = "Crew Manifest";
                 button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-                button.OnClick += (e) =>
+                button.OnClick += onButtonClick;
+
+                if (appButton == null)
                 {
-                    if(!MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying &&
+                    appButton = ApplicationLauncher.Instance.AddModApplication(
+                        onButtonClick, onButtonClick,
+                        null, null,
+                        null, null,
+                        ApplicationLauncher.AppScenes.ALWAYS,
+                        offTexture);
+                }
+            }
+        }
+
+        private void onButtonClick(ClickEvent clickEvent)
+        {
+            onButtonClick();
+        }
+
+        private void onButtonClick()
+        {
+            if (!MapView.MapIsEnabled && !PauseMenu.isOpen && !FlightResultsDialog.isDisplaying &&
                         FlightGlobals.fetch != null && FlightGlobals.ActiveVessel != null &&
                         ManifestController.GetInstance(FlightGlobals.ActiveVessel).CanDrawButton
                         )
-                    {
-                        ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
+            {
+                ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
 
-                        button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Icons/IconOff_24" : "CrewManifest/Icons/IconOn_24";
-                        manifestController.ShowWindow = !manifestController.ShowWindow;
-                    }
-                };
+                button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Icons/IconOff_24" : "CrewManifest/Icons/IconOn_24";
+                
+                manifestController.ShowWindow = !manifestController.ShowWindow;
+                
+                appButton.SetTexture(manifestController.ShowWindow ? onTexture : offTexture);
             }
         }
+
 
         public void OnDestroy()
         {
@@ -76,6 +101,12 @@ namespace CrewManifest
 
                 if (button != null)
                     button.Destroy();
+
+                if (appButton != null)
+                {
+                    ApplicationLauncher.Instance.RemoveModApplication(appButton);
+                    appButton = null;
+                }
             }
         }
 

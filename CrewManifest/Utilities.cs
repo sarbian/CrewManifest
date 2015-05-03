@@ -9,8 +9,6 @@ namespace CrewManifest
 {
     public static class ManifestUtilities
     {
-        public static String AppPath = KSPUtil.ApplicationRootPath.Replace("\\", "/");
-        public static String PlugInPath = AppPath + "GameData/CrewManifest/Plugins/PluginData/CrewManifest/";
         public static Vector2 DebugScrollPosition = Vector2.zero;
 
         private static List<string> _errors = new List<string>();
@@ -18,14 +16,7 @@ namespace CrewManifest
         {
             get { return _errors; }
         }
-
-        public static void LoadTexture(ref Texture2D tex, String FileName)
-        {
-            LogMessage(String.Format("Loading Texture - file://{0}{1}", PlugInPath, FileName), "Info");
-            WWW img1 = new WWW(String.Format("file://{0}{1}", PlugInPath, FileName));
-            img1.LoadImageIntoTexture(tex);
-        }
-
+        
         public static void LogMessage(string error, string type)
         {
             _errors.Add(type + ": " + error);
