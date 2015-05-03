@@ -14,6 +14,8 @@ namespace CrewManifest
         public float Courage;
         public bool Badass;
         public string Name;
+        public ProtoCrewMember.Gender Gender;
+        public ProtoCrewMember.KerbalType Type;
 
         public KerbalModel(ProtoCrewMember kerbal, bool isNew)
         {
@@ -22,6 +24,8 @@ namespace CrewManifest
             Stupidity = kerbal.stupidity;
             Courage = kerbal.courage;
             Badass = kerbal.isBadass;
+            Gender = kerbal.gender;
+            Type = kerbal.type;
             IsNew = isNew;
         }
 
@@ -49,6 +53,8 @@ namespace CrewManifest
             Kerbal.stupidity = Stupidity;
             Kerbal.courage = Courage;
             Kerbal.isBadass = Badass;
+            Kerbal.gender = Gender;
+            Kerbal.type = Type;
         }
 
         private bool NameExists()

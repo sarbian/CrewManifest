@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Experience;
 using UnityEngine;
 
 namespace CrewManifest
@@ -11,6 +12,8 @@ namespace CrewManifest
         #region Singleton stuff
 
         private static Dictionary<WeakReference<Vessel>, ManifestController> controllers = new Dictionary<WeakReference<Vessel>, ManifestController>();
+
+        private List<string> traitsList;
 
         public static ManifestController GetInstance(Vessel vessel)
         {
@@ -39,6 +42,8 @@ namespace CrewManifest
         public ManifestController()
         {
             RenderingManager.AddToPostDrawQueue(3, drawGui);
+
+            traitsList = KerbalRoster.ExperienceConfig.Categories.Where(trait => trait.Name != "Tourist").Select(trait => trait.Name).ToList();
         }
 
         public Vessel Vessel
@@ -146,7 +151,7 @@ namespace CrewManifest
 
         private KerbalModel CreateKerbal()
         {
-            ProtoCrewMember kerbal = CrewGenerator.RandomCrewMemberPrototype();       
+            ProtoCrewMember kerbal = CrewGenerator.RandomCrewMemberPrototype();
             return new KerbalModel(kerbal, true);
         }
 
@@ -572,6 +577,9 @@ namespace CrewManifest
             }
         }
         private Vector2 rosterScrollViewer = Vector2.zero;
+
+        private int selectedType;
+
         private void RosterWindow(int windowId)
         {
             GUIStyle style = GUI.skin.button;
@@ -644,6 +652,7 @@ namespace CrewManifest
 
             if (SelectedKerbal != null)
             {
+                GUILayout.BeginVertical();
                 GUILayout.Label(SelectedKerbal.IsNew ? "Create a Kerbal" : "Edit a Kerbal");
                 SelectedKerbal.Name = GUILayout.TextField(SelectedKerbal.Name);
 
@@ -660,6 +669,30 @@ namespace CrewManifest
 
                 SelectedKerbal.Badass = GUILayout.Toggle(SelectedKerbal.Badass, "Badass");
 
+                Boolean male = SelectedKerbal.Gender == ProtoCrewMember.Gender.Male;
+
+                GUILayout.BeginHorizontal();
+                male = GUILayout.Toggle(male, "Male", GUILayout.ExpandWidth(true));
+                male = !GUILayout.Toggle(!male, "Female", GUILayout.ExpandWidth(true));
+                GUILayout.EndHorizontal();
+
+                SelectedKerbal.Gender = male ? ProtoCrewMember.Gender.Male : ProtoCrewMember.Gender.Female;
+
+                foreach (int type in Enum.GetValues(typeof(ProtoCrewMember.KerbalType)))
+                {
+                    if (type % 2 == 0)
+                        GUILayout.BeginHorizontal();
+                    bool selected = GUILayout.Toggle(selectedType == type, ((ProtoCrewMember.KerbalType)type).ToString(), GUILayout.ExpandWidth(true));
+                    if (selected)
+                        selectedType = type;
+                    if (type % 2 == 1)
+                        GUILayout.EndHorizontal();
+                }
+
+                SelectedKerbal.Type = (ProtoCrewMember.KerbalType)selectedType;
+
+                GUILayout.Label("Profession : " + (SelectedKerbal.Type != ProtoCrewMember.KerbalType.Tourist ? traitsList[Math.Abs(SelectedKerbal.Name.GetHashCode()) % traitsList.Count()] : "Tourist"));
+
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Cancel", GUILayout.MaxWidth(50)))
                 {
@@ -672,6 +705,7 @@ namespace CrewManifest
                         SelectedKerbal = null;
                 }
                 GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
             }
             else
             {
