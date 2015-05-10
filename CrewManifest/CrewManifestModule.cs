@@ -31,8 +31,6 @@ namespace CrewManifest
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ManifestBehaviour : MonoBehaviour
     {
-        //Game object that keeps us running
-        public static GameObject GameObjectInstance;
         public static SettingsManager Settings = new SettingsManager();
         private float interval = 30F;
         //private float intervalCrewCheck = 0.5f;
@@ -51,14 +49,17 @@ namespace CrewManifest
                 DontDestroyOnLoad(this);
                 Settings.Load();
                 InvokeRepeating("RunSave", interval, interval);
-                
-                button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
-                button.TexturePath = "CrewManifest/Icons/IconOff_24";
-                button.ToolTip = "Crew Manifest";
-                button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
-                button.OnClick += onButtonClick;
 
-                if (appButton == null)
+                if (ToolbarManager.ToolbarAvailable)
+                {
+                    button = ToolbarManager.Instance.add("CrewManifest", "CrewManifest");
+                    button.TexturePath = "CrewManifest/Icons/IconOff_24";
+                    button.ToolTip = "Crew Manifest";
+                    button.Visibility = new GameScenesVisibility(GameScenes.FLIGHT);
+                    button.OnClick += onButtonClick;
+                }
+
+                if (appButton == null && Settings.AppLauncher)
                 {
                     appButton = ApplicationLauncher.Instance.AddModApplication(
                         onButtonClick, onButtonClick,
@@ -84,11 +85,13 @@ namespace CrewManifest
             {
                 ManifestController manifestController = ManifestController.GetInstance(FlightGlobals.ActiveVessel);
 
-                button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Icons/IconOff_24" : "CrewManifest/Icons/IconOn_24";
-                
                 manifestController.ShowWindow = !manifestController.ShowWindow;
-                
-                appButton.SetTexture(manifestController.ShowWindow ? onTexture : offTexture);
+
+                if (button != null)
+                    button.TexturePath = manifestController.ShowWindow ? "CrewManifest/Icons/IconOff_24" : "CrewManifest/Icons/IconOn_24";
+
+                if (appButton != null)
+                    appButton.SetTexture(manifestController.ShowWindow ? onTexture : offTexture);
             }
         }
 
