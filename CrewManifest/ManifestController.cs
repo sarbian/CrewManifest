@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Experience;
+using KSP.UI.Dialogs;
 using UnityEngine;
 
 namespace CrewManifest
@@ -24,7 +25,6 @@ namespace CrewManifest
                 if (v == null)
                 {
                     controllers.Remove(wr);
-                    RenderingManager.RemoveFromPostDrawQueue(3, kvp.Value.drawGui);
                 }
                 else if (v == vessel)
                 {
@@ -41,8 +41,6 @@ namespace CrewManifest
 
         public ManifestController()
         {
-            RenderingManager.AddToPostDrawQueue(3, drawGui);
-
             traitsList = KerbalRoster.ExperienceConfig.Categories.Where(trait => trait.Name != "Tourist").Select(trait => trait.Name).ToList();
         }
 
@@ -326,7 +324,7 @@ namespace CrewManifest
             }
         }
 
-        private void drawGui()
+        public void drawGui()
         {
             if (FlightGlobals.fetch == null)
             { return; }

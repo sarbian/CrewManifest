@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using KSP.UI.Dialogs;
+using KSP.UI.Screens;
 using UnityEngine;
 
 namespace CrewManifest
@@ -117,7 +119,9 @@ namespace CrewManifest
         {
             Resources.SetupGUI();
 
-            if(Settings.ShowDebugger)
+            ManifestController.GetInstance(FlightGlobals.ActiveVessel).drawGui();
+
+            if (Settings.ShowDebugger)
                 Settings.DebuggerPosition = GUILayout.Window(398643, Settings.DebuggerPosition, DrawDebugger, "Manifest Debug Console", GUILayout.MinHeight(20));
         }
         
