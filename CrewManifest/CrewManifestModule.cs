@@ -61,7 +61,8 @@ namespace CrewManifest
                     button.OnClick += onButtonClick;
                 }
 
-                if (appButton == null && Settings.AppLauncher)
+                //if (appButton == null && Settings.AppLauncher)
+                if (appButton == null)
                 {
                     appButton = ApplicationLauncher.Instance.AddModApplication(
                         onButtonClick, onButtonClick,

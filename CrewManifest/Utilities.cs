@@ -93,7 +93,7 @@ namespace CrewManifest
         public Rect DebuggerPosition;
         public bool ShowDebugger;
         
-        public bool AppLauncher = true;
+        //public bool AppLauncher = true;
 
         public void Load()
         {
@@ -110,7 +110,7 @@ namespace CrewManifest
                 SettingsPosition = configfile.GetValue<Rect>("SettingsPosition");
                 DebuggerPosition = configfile.GetValue<Rect>("DebuggerPosition");
                 ShowDebugger = configfile.GetValue<bool>("ShowDebugger");
-                AppLauncher = configfile.GetValue<bool>("AppLauncher");
+                //AppLauncher = configfile.GetValue<bool>("AppLauncher");
                                 
                 ManifestUtilities.LogMessage(string.Format("ManifestPosition Loaded: {0}, {1}, {2}, {3}", ManifestPosition.xMin, ManifestPosition.xMax, ManifestPosition.yMin, ManifestPosition.yMax), "Info");
                 ManifestUtilities.LogMessage(string.Format("TransferPosition Loaded: {0}, {1}, {2}, {3}", TransferPosition.xMin, TransferPosition.xMax, TransferPosition.yMin, TransferPosition.yMax), "Info");
@@ -152,7 +152,7 @@ namespace CrewManifest
                 configfile.SetValue("SettingsPosition", SettingsPosition);
                 configfile.SetValue("DebuggerPosition", DebuggerPosition);
                 configfile.SetValue("ShowDebugger", ShowDebugger);
-                configfile.SetValue("AppLauncher", AppLauncher);
+                //configfile.SetValue("AppLauncher", AppLauncher);
 
                 configfile.save();
 
