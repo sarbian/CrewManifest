@@ -49,7 +49,7 @@ namespace CrewManifest
 
         public void SyncKerbal()
         {
-            Kerbal.name = Name;
+            Kerbal.ChangeName(Name);
             Kerbal.stupidity = Stupidity;
             Kerbal.courage = Courage;
             Kerbal.isBadass = Badass;

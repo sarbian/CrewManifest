@@ -41,7 +41,7 @@ namespace CrewManifest
 
         public ManifestController()
         {
-            traitsList = KerbalRoster.ExperienceConfig.Categories.Where(trait => trait.Name != "Tourist").Select(trait => trait.Name).ToList();
+            traitsList = GameDatabase.Instance.ExperienceConfigs.Categories.Where(trait => trait.Name != "Tourist").Select(trait => trait.Name).ToList();
         }
 
         public Vessel Vessel
@@ -142,7 +142,7 @@ namespace CrewManifest
         private void RespawnKerbal(ProtoCrewMember kerbal)
         {
             kerbal.SetTimeForRespawn(0);
-            kerbal.Spawn();
+            kerbal.StartRespawnPeriod();
             kerbal.rosterStatus = ProtoCrewMember.RosterStatus.Available;
             HighLogic.CurrentGame.CrewRoster.GetNextAvailableKerbal();
         }
