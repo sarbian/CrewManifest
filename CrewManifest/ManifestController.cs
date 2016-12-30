@@ -189,6 +189,9 @@ namespace CrewManifest
             }
             set
             {
+                if (_selectedPart == value)
+                    return;
+
                 ClearHighlight(_selectedPart);
                 _selectedPart = value;
                 if (_selectedPart != null)
@@ -208,6 +211,9 @@ namespace CrewManifest
             }
             set
             {
+                if (_selectedPartSource == value)
+                    return;
+
                 if ((value != null && _selectedPartTarget != null) && value.craftID == _selectedPartTarget.craftID)
                     SelectedPartTarget = null;
 
@@ -228,6 +234,9 @@ namespace CrewManifest
             }
             set
             {
+                if (_selectedPartTarget == value)
+                    return;
+
                 ClearHighlight(_selectedPartTarget);
                 _selectedPartTarget = value;
                 SetPartHighlight(_selectedPartTarget, Resources.TargetColor);
@@ -734,20 +743,24 @@ namespace CrewManifest
 
         private void ClearHighlight(Part part)
         {
-            if (part != null)
-            {
-                part.SetHighlightDefault();
-                part.SetHighlight(false, false);
-            }
+            if (part == null || !part.HighlightActive)
+                return;
+
+            part.SetHighlightDefault();
+            MonoBehaviour.print("ClearHighlight");
         }
 
         private void SetPartHighlight(Part part, Color color)
         {
-            if (part != null)
-            {
-                part.SetHighlightColor(color);
+            if (part == null)
+                return;
+
+            if (!part.HighlightActive)
                 part.SetHighlight(true, false);
-            }
+
+            part.highlightType = Part.HighlightType.AlwaysOn; 
+            part.SetHighlightColor(color);
+            MonoBehaviour.print("SetPartHighlight " + color);
         }
         #endregion
     }
