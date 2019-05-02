@@ -1,0 +1,12 @@
+{
+  "NAME": "Crew Manifest",
+  "URL": "https://raw.githubusercontent.com/sarbian/CrewManifest/master/CrewManifest.version",
+  "VERSION": {
+    "MAJOR": "HEAD"
+  },
+  "KSP_VERSION": {
+    "MAJOR": 0,
+    "MINOR": 23,
+    "PATCH": 5
+  }
+}
